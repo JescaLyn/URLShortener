@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+require 'launchy'
+
+puts "Input your email"
+email = gets.chomp
+
+if User.exists?(email: email)
+  user = User.find_by(email: email)
+else
+  user = User.create!(email: email)
+end
+
+puts "What do you want to do?"
+puts "0. Create shortened URL"
+puts "1. Visit shortened URL"
+action = gets.chomp.to_i
+
+if action.zero?
+  puts "Enter you gigantic url to fix"
+  long_url = gets.chomp
+  ShortenedUrl.create_for_user_and_long_url!(user, long_url)
+
+  puts "Short url is: #{ShortenedUrl.last.short_url}"
+elsif action == 1
+  puts "Enter your short URL"
+  to_launch = gets.chomp
+  to_launch = ShortenedUrl.find_by(short_url: to_launch).long_url
+
+  Launchy.open(to_launch) do |exception|
+    puts "Crash Landing :( because of #{exception}"
+  end
+end
+
+puts "See ya"
